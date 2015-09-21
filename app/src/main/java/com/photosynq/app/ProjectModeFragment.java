@@ -18,14 +18,13 @@ import android.widget.Toast;
 
 import com.photosynq.app.db.DatabaseHelper;
 import com.photosynq.app.http.PhotosynqResponse;
+import com.photosynq.app.model.ProjectCreator;
 import com.photosynq.app.model.ResearchProject;
 import com.photosynq.app.utils.CommonUtils;
 import com.photosynq.app.utils.Constants;
 import com.photosynq.app.utils.PrefUtils;
 import com.photosynq.app.utils.SyncHandler;
 import com.squareup.picasso.Picasso;
-
-import junit.framework.TestCase;
 
 import java.util.List;
 
@@ -43,8 +42,6 @@ public class ProjectModeFragment extends Fragment implements PhotosynqResponse{
     private ListView projectList;
     private static String mSearchString;
     private String pCreatorId;
-    private List<ResearchProject> projects;
-
     /**
      * Returns a new instance of this fragment for the given section
      * number.
@@ -100,30 +97,18 @@ public class ProjectModeFragment extends Fragment implements PhotosynqResponse{
                 ResearchProject project = (ResearchProject) projectList.getItemAtPosition(position);
                 Intent intent = new Intent(getActivity(), ProjectDetailsActivity.class);
                 intent.putExtra(DatabaseHelper.C_PROJECT_ID, project.getId());
-                startActivityForResult(intent, 555);
-
+                startActivity(intent);
             }
         });
-
 
         return rootView;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        if (resultCode == 555) {
-
-            ((MainActivity) getActivity()).openDrawer();
-
-        }
-    }
-
     private void showProjectList() {
+        List<ResearchProject> projects = null;
         if(mSearchString.length() > 0) {
             if(mSectionNumber == 0) {
-                projects=dbHelper.getAllResearchProjects(mSearchString);
+                projects = dbHelper.getAllResearchProjects(mSearchString);
             }else{
                 projects = dbHelper.getUserCreatedContributedProjects(mSearchString, pCreatorId);
             }
@@ -134,7 +119,7 @@ public class ProjectModeFragment extends Fragment implements PhotosynqResponse{
             if(mSectionNumber == 0) {
                 projects = dbHelper.getAllResearchProjects();
             }else{
-                projects= dbHelper.getUserCreatedContributedProjects(pCreatorId);
+                projects = dbHelper.getUserCreatedContributedProjects(pCreatorId);
             }
         }
 
@@ -147,28 +132,25 @@ public class ProjectModeFragment extends Fragment implements PhotosynqResponse{
      */
     private void refreshProjectList() {
         dbHelper = DatabaseHelper.getHelper(getActivity());
-        projects.clear();
+        List<ResearchProject> projects;
         if(mSearchString.length() > 0) {
             if(mSectionNumber == 0) {
-                projects.addAll(dbHelper.getAllResearchProjects(mSearchString));
+                projects = dbHelper.getAllResearchProjects(mSearchString);
             }else{
-                projects.addAll(dbHelper.getUserCreatedContributedProjects(mSearchString, pCreatorId));
+                projects = dbHelper.getUserCreatedContributedProjects(mSearchString, pCreatorId);
             }
             if(projects.isEmpty()){
                 Toast.makeText(getActivity(), "No project found", Toast.LENGTH_LONG).show();
             }
         }else{
             if(mSectionNumber == 0) {
-                projects.addAll(dbHelper.getAllResearchProjects());
+                projects = dbHelper.getAllResearchProjects();
             }else{
-                projects.addAll(dbHelper.getUserCreatedContributedProjects(pCreatorId));
+                projects = dbHelper.getUserCreatedContributedProjects(pCreatorId);
             }
         }
-
-        //arrayAdapter = new ProjectArrayAdapter(getActivity(), projects);
-        //projectList.setAdapter(arrayAdapter);
-        arrayAdapter.notifyDataSetChanged();
-        projectList.invalidateViews();
+        arrayAdapter = new ProjectArrayAdapter(getActivity(), projects);
+        projectList.setAdapter(arrayAdapter);
     }
 
     @Override
@@ -230,55 +212,39 @@ public class ProjectModeFragment extends Fragment implements PhotosynqResponse{
         }
 
         @Override
-        public View getView(int position, View view, ViewGroup parent) {
-            ViewHolder holder;
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null)
+                convertView = mInflater.inflate(R.layout.project_list_item, null);
 
+            TextView tvProjectName = (TextView) convertView.findViewById(R.id.tv_project_name);
+            tvProjectName.setTypeface(CommonUtils.getInstance(getActivity()).getFontRobotoRegular());
+            TextView tvProjectBy = (TextView) convertView.findViewById(R.id.tv_project_by);
+            tvProjectBy.setTypeface(CommonUtils.getInstance(getActivity()).getFontRobotoRegular());
 //            TextView tvLastCont = (TextView) convertView.findViewById(R.id.tv_last_contribution);
 //            tvLastCont.setTypeface(CommonUtils.getInstance(getActivity()).getFontRobotoRegular());
-
-            if (view == null) {
-                view = LayoutInflater.from(context).inflate(R.layout.project_list_item, parent, false);
-                holder = new ViewHolder();
-                holder.imageview = (ImageView) view.findViewById(R.id.im_projectImage);
-                holder.tvProjectName = (TextView) view.findViewById(R.id.tv_project_name);
-                holder.tvProjectName.setTypeface(CommonUtils.getInstance(getActivity()).getFontRobotoRegular());
-                holder.tvProjectBy = (TextView) view.findViewById(R.id.tv_project_by);
-                holder.tvProjectBy.setTypeface(CommonUtils.getInstance(getActivity()).getFontRobotoRegular());
-                view.setTag(holder);
-            } else {
-                holder = (ViewHolder) view.getTag();
-            }
 
             ResearchProject project = getItem(position);
             if (null != project) {
                 try {
-                    holder.tvProjectName.setText(project.getName());
-                    holder.tvProjectBy.setText("by " + project.getLead_name());
+                    tvProjectName.setText(project.getName());
 
-//                    ImageView imageview = (ImageView) convertView.findViewById(R.id.im_projectImage);
-                    //Picasso.with(getActivity()).load(project.getImageUrl()).into(imageview);
-//                    Picasso.with(this.context)
-//                            .load(project.getImageUrl())
-//                            .into(imageview);
+                    ProjectCreator projectCreator = dbHelper.getProjectLead(project.getCreatorId());
+                    if(null != projectCreator)
+                        tvProjectBy.setText("by " + projectCreator.getName());
 
-                    Picasso.with(context)
+                    ImageView imageview = (ImageView) convertView.findViewById(R.id.im_projectImage);
+                    Picasso.with(getActivity()).load(project.getImageUrl()).into(imageview);
+                    Picasso.with(getActivity())
                             .load(project.getImageUrl())
-                            .placeholder(R.drawable.ic_launcher1)
-                            .error(R.drawable.ic_launcher1)
-                            .resize(200,200)
-                            .centerCrop()
-                            .into(holder.imageview);
+                            .error(R.drawable.ic_launcher)
+                            .into(imageview);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
 
-            return view;
+            return convertView;
         }
-    }
-    static class ViewHolder {
-        TextView tvProjectName;
-        TextView tvProjectBy;
-        ImageView imageview;
     }
 }

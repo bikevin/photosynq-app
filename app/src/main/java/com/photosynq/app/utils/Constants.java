@@ -7,8 +7,8 @@ public class Constants {
 
     public static final String SUCCESS = "SUCCESS";
     public static final String SERVER_NOT_ACCESSIBLE = "SERVER_NOT_ACCESSIBLE";
-    public static final String SERVER_URL = "http://photosynq.org/";
-    //  public static final String SERVER_URL = "http://staging.photosynq.venturit.net/";
+//    public static final String SERVER_URL = "http://photosynq.org/";
+    public static final String SERVER_URL = "http://staging.photosynq.venturit.net/";
 
 
     public static final String API_VER = "api/v2/";
@@ -45,7 +45,6 @@ public class Constants {
      * Remember the position of the selected item.
      */
     public static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
-    public static final String START_MEASURE = "start_measure";
 
     //
     public enum QuestionType {

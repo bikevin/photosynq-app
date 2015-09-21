@@ -34,7 +34,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
+//TODO reenable crashlytics at some point
 import com.crashlytics.android.Crashlytics;
 import com.photosynq.app.http.HTTPConnection;
 import com.photosynq.app.http.PhotosynqResponse;
@@ -79,7 +79,7 @@ public class LoginActivity extends Activity implements PhotosynqResponse {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
+        //Fabric.with(this, new Crashlytics());
 
         copyAssets();
 
@@ -117,6 +117,9 @@ public class LoginActivity extends Activity implements PhotosynqResponse {
         TextView tvWelcomeDesc = (TextView) findViewById(R.id.txtWelDesc);
         tvWelcomeDesc.setTypeface(robotoLightFace);
 
+        Button tutorial_btn = (Button) findViewById(R.id.tutorial_button);
+        tutorial_btn.setTypeface(robotoMediumFace);
+
         Button signIn = (Button) findViewById(R.id.sign_in_button);
         signIn.setTypeface(robotoMediumFace);
         signIn.setOnClickListener(new View.OnClickListener() {
@@ -124,18 +127,6 @@ public class LoginActivity extends Activity implements PhotosynqResponse {
             public void onClick(View view) {
 
                 startLoginActivity();
-            }
-        });
-
-        Button createNewAccount = (Button) findViewById(R.id.create_new_account_button);
-        createNewAccount.setTypeface(robotoMediumFace);
-        createNewAccount.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Uri uriUrl = Uri.parse(Constants.SERVER_URL + "users/sign_up");
-                Intent intent = new Intent(Intent.ACTION_VIEW, uriUrl);
-                startActivity(intent);
             }
         });
     }
@@ -256,10 +247,12 @@ public class LoginActivity extends Activity implements PhotosynqResponse {
     }
 
     private boolean isEmailValid(String email) {
+        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
+        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
@@ -328,6 +321,7 @@ public class LoginActivity extends Activity implements PhotosynqResponse {
                 PrefUtils.saveToPrefs(getApplicationContext(),PrefUtils.PREFS_PROJECTS,userJsonObject.get("projects").toString());
                 PrefUtils.saveToPrefs(getApplicationContext(),PrefUtils.PREFS_CONTRIBUTIONS,userJsonObject.get("contributions").toString());
             } catch (JSONException e) {
+                // TODO Log error
                 e.printStackTrace();
             }
 

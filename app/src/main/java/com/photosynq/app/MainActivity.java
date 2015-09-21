@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.provider.Settings;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -14,10 +12,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.text.SpannableString;
-import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,8 +19,6 @@ import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.TextView;
-
 import com.photosynq.app.utils.Constants;
 import com.photosynq.app.utils.PrefUtils;
 
@@ -85,14 +77,6 @@ public class MainActivity extends ActionBarActivity
         handleIntent(intent);
     }
 
-    public void openDrawer(){
-        // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
-        // per the navigation drawer design guidelines.
-        if (mNavigationDrawerFragment != null) {
-            mNavigationDrawerFragment.openDrawer();
-        }
-    }
-
     private void handleIntent(Intent intent) {
 
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
@@ -102,11 +86,11 @@ public class MainActivity extends ActionBarActivity
 
             FragmentManager fragmentManager = getSupportFragmentManager();
             //use the query to search your data somehow
-            if(mCurrentSelectedPosition == 1) { //My Projects
+            if(mCurrentSelectedPosition == 0) {//Discover
                 fragmentManager.beginTransaction()
                         .replace(R.id.container, ProjectModeFragment.newInstance(mCurrentSelectedPosition, query), ProjectModeFragment.class.getName())
                         .commit();
-            }else{
+            }else if(mCurrentSelectedPosition == 1) { //My Projects
                 fragmentManager.beginTransaction()
                         .replace(R.id.container, ProjectModeFragment.newInstance(mCurrentSelectedPosition, query), ProjectModeFragment.class.getName())
                         .commit();
@@ -145,7 +129,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
-        if(position != 5) // Do not keep selection of Select measurement device option
+        if(position != 6) // Do not keep selection of Select measurement device option
             mCurrentSelectedPosition = position;
         FragmentManager fragmentManager = getSupportFragmentManager();
 
@@ -177,48 +161,10 @@ public class MainActivity extends ActionBarActivity
                         .commit();
                 break;
             case 4:
-
-                try {
-
-                    String appName = getString(R.string.app_name);
-                    String versionName = this.getPackageManager()
-                            .getPackageInfo(this.getPackageName(), 0).versionName;
-
-                    String messageStr = appName + "\n\n" +
-                            "Version " + versionName + "\n" +
-                            Constants.SERVER_URL;
-
-                    final SpannableString s =
-                            new SpannableString(messageStr);
-                    Linkify.addLinks(s, Linkify.WEB_URLS);
-                    final TextView message = new TextView(this);
-                    message.setPadding(25,25,25,25);
-                    message.setGravity(Gravity.CENTER);
-                    message.setText(s);
-                    message.setMovementMethod(LinkMovementMethod.getInstance());
-
-                    System.out.println(versionName);
-
-                    new AlertDialog.Builder(this)
-                            .setIcon(R.drawable.ic_launcher1)
-                            .setTitle("About")
-                            .setView(message)
-                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int which) {
-
-
-                                        }
-
-                                    }
-
-                            )
-                            .show();
-
-                } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
-                }
-
+                // Open test page for now, GPS waypoint system later
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, WaypointDisplayFragment.newInstance(position), WaypointDisplayFragment.class.getName())
+                        .commit();
                 break;
             case 5:
                 // Open Profile
@@ -231,6 +177,7 @@ public class MainActivity extends ActionBarActivity
                 SelectDeviceDialog selectDeviceDialog = new SelectDeviceDialog();
                 selectDeviceDialog.show(fragmentManager, "Select Measurement Device");
                 break;
+
         }
 //        fragmentManager.beginTransaction()
 //                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
@@ -268,8 +215,12 @@ public class MainActivity extends ActionBarActivity
                 mTitle = getString(R.string.sync_settings_title);
                 break;
             case 4:
+                mTitle = getString(R.string.test_title);
+                break;
+            case 5:
                 mTitle = getString(R.string.profile_title);
                 break;
+
         }
     }
 

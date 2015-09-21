@@ -8,24 +8,19 @@ public class Data {
     public static final String SCAN_CODE = "SCAN_CODE";
     public static final String PREV = "PREV";
     public static final String NEXT = "NEXT";
-    private String user_id;
-	private String project_id;
-	private String question_id;
-	private String type;
-	private String value;
-	private String selected_option;
-    private String is_remembered;
-
+    public String user_id;
+	public String project_id;
+	public String question_id;
+	public String type;
+	public String value;
 	
-	public Data(String user_id,String project_id,String question_id,String type,String value, String selected_option, String is_remembered)
+	public Data(String user_id,String project_id,String question_id,String type,String value)
 	{
 		this.user_id = user_id;
 		this.project_id = project_id;
 		this.question_id = question_id;
 		this.type = type;
 		this.value = value;
-		this.selected_option = selected_option;
-		this.is_remembered = is_remembered;
 	}
 	public Data()
 	{
@@ -61,21 +56,4 @@ public class Data {
 	public void setValue(String value) {
 		this.value = value;
 	}
-    public String getIs_remembered() {
-        return is_remembered;
-    }
-
-    public void setIs_remembered(String is_remembered) {
-        this.is_remembered = is_remembered;
-    }
-
-    public String getSelected_option() {
-        return selected_option;
-    }
-
-    public void setSelected_option(String selected_option) {
-        this.selected_option = selected_option;
-    }
-
-
 }

@@ -1,6 +1,5 @@
 package com.photosynq.app.response;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.support.v4.app.FragmentManager;
@@ -25,13 +24,11 @@ import java.util.Date;
  * Created by shekhar on 9/19/14.
  */
 public class UpdateProtocol implements PhotosynqResponse {
-    private Activity context;
     private MainActivity navigationDrawer;
     private ProgressDialog mProgressDialog;
 
-    public UpdateProtocol(Activity context, MainActivity navigationDrawer, ProgressDialog progressDialog)
+    public UpdateProtocol(MainActivity navigationDrawer, ProgressDialog progressDialog)
     {
-        this.context = context;
         this.navigationDrawer = navigationDrawer;
         this.mProgressDialog = progressDialog;
     }
@@ -64,6 +61,8 @@ public class UpdateProtocol implements PhotosynqResponse {
 
         JSONArray jArray;
         DatabaseHelper db = DatabaseHelper.getHelper(navigationDrawer);
+//        db.openWriteDatabase();
+//        db.openReadDatabase();
         if (null != result) {
             if(result.equals(Constants.SERVER_NOT_ACCESSIBLE))
             {
@@ -76,6 +75,8 @@ public class UpdateProtocol implements PhotosynqResponse {
 
                     });
                 }
+//                db.closeWriteDatabase();
+//                db.closeReadDatabase();
                 return;
             }
 
@@ -91,7 +92,7 @@ public class UpdateProtocol implements PhotosynqResponse {
                         String id = obj.getString("id");
                         Protocol protocol = new Protocol(id,
                                 obj.getString("name"),
-                                    obj.getString("protocol_json"),
+                                obj.getString("protocol_json"),
                                 obj.getString("description"),
                                 obj.getString("macro_id"), "slug",
                                 obj.getString("pre_selected"));
@@ -104,6 +105,8 @@ public class UpdateProtocol implements PhotosynqResponse {
             }
         }
 
+//        db.closeWriteDatabase();
+//        db.closeReadDatabase();
         Date date1 = new Date();
 
         if(null != navigationDrawer) {
@@ -130,6 +133,6 @@ public class UpdateProtocol implements PhotosynqResponse {
 
         System.out.println("UpdateProtocol End onResponseReceived: " + date1.getTime());
         //show progress dialog process on sync screen after sync button click
-        CommonUtils.setProgress(context, mProgressDialog, 20);
+        CommonUtils.setProgress(navigationDrawer, mProgressDialog, 20);
     }
 }

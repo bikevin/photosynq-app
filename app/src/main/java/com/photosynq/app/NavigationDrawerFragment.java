@@ -3,7 +3,6 @@ package com.photosynq.app;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
@@ -24,27 +23,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.photosynq.app.db.DatabaseHelper;
 import com.photosynq.app.model.AppSettings;
-import com.photosynq.app.model.ProjectResult;
 import com.photosynq.app.utils.CommonUtils;
 import com.photosynq.app.utils.Constants;
 import com.photosynq.app.utils.PrefUtils;
-import com.photosynq.app.utils.SyncHandler;
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
 import java.util.Set;
-
-//import tourguide.tourguide.TourGuide;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -80,9 +72,6 @@ public class NavigationDrawerFragment extends Fragment {
 
     TextView tvDeviceName;
     TextView tvDeviceAddress;
-    //TourGuide mTourGuideHandler;
-    private DatabaseHelper db;
-    private Button totalDataPointsBtn;
 
     public NavigationDrawerFragment() {
     }
@@ -132,7 +121,7 @@ public class NavigationDrawerFragment extends Fragment {
         ImageView profileImage = (ImageView) linearLayout.findViewById(R.id.user_profile_image);
         Picasso.with(getActivity())
                 .load(imageUrl)
-                .error(R.drawable.ic_launcher1)
+                .error(R.drawable.ic_launcher)
                 .into(profileImage);
         profileImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,7 +136,6 @@ public class NavigationDrawerFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 selectItem(6);
-                //mTourGuideHandler.cleanUp();
             }
         });
 
@@ -157,41 +145,6 @@ public class NavigationDrawerFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 selectItem(6);
-            }
-        });
-
-        db = DatabaseHelper.getHelper(getActivity());
-        //List<ProjectResult> listRecords = db.getAllUnUploadedResults();
-        //int recordCount = db.getAllUnuploadedResultsCount(null);
-        //PrefUtils.saveToPrefs(getActivity(), PrefUtils.PREFS_TOTAL_CACHED_DATA_POINTS, "" + recordCount);
-        totalDataPointsBtn = (Button) linearLayout.findViewById(R.id.totalCachedDataPointsBtn);
-        //totalDataPointsBtn.setText("" + recordCount);
-
-        totalDataPointsBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int recordCount = db.getAllUnuploadedResultsCount(null);
-                if(recordCount == 0) {
-                    Toast.makeText(getActivity(), "No cached data point", Toast.LENGTH_SHORT).show();
-                }else {
-                    Intent intent = new Intent(getActivity(), DisplayCachedDataPoints.class);
-                    startActivity(intent);
-                }
-                selectItem(7);
-            }
-        });
-
-        TableRow syncWithServerBtnMenuBar = (TableRow) linearLayout.findViewById(R.id.sync_with_server_btn_menu_bar);
-        syncWithServerBtnMenuBar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity mainActivity = (MainActivity) getActivity();
-                SyncHandler syncHandler = new SyncHandler(mainActivity, MainActivity.getProgressBar());
-                syncHandler.DoSync(SyncHandler.ALL_SYNC_UI_MODE);
-
-                Toast.makeText(getActivity(), "Sync started!", Toast.LENGTH_LONG).show();
-
-                selectItem(7);
             }
         });
 
@@ -210,11 +163,10 @@ public class NavigationDrawerFragment extends Fragment {
                         getString(R.string.my_projects_title),
                         getString(R.string.quick_measurement_title),
                         getString(R.string.sync_settings_title),
-                        "About"
+                        getString(R.string.test_title)
                 });
         mDrawerListView.setAdapter(mNavigationAdapter);
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-
         return linearLayout;
     }
 
@@ -279,11 +231,8 @@ public class NavigationDrawerFragment extends Fragment {
                     }
                 }
 
-                //final List<ProjectResult> listRecords = db.getAllUnUploadedResults();
-                int recordCount = db.getAllUnuploadedResultsCount(null);
-                totalDataPointsBtn.setText("" + recordCount);
                 if(appSettings.getConnectionId() == null){
-                    ((MainActivity) getActivity()).setDeviceConnected("Tap to connect device", "");
+                    ((MainActivity) getActivity()).setDeviceConnected("Click here to connect device", "");
                 }
 
 
@@ -308,44 +257,6 @@ public class NavigationDrawerFragment extends Fragment {
         // per the navigation drawer design guidelines.
         if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
             mDrawerLayout.openDrawer(mFragmentContainerView);
-
-//            CommonUtils.showShowCaseView(getActivity(), R.id.tvDeviceName, "Welcome to PhotosynQ!", "First, pair your measurement device")
-//                    .setOnShowcaseEventListener(new OnShowcaseEventListener() {
-//                        @Override
-//                        public void onShowcaseViewHide(ShowcaseView showcaseView) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-//
-//                            CommonUtils.showShowCaseView(getActivity(), R.id.navigation_item_list, "Search for new projects in Discover or projects you created or joined in My Projects", "")
-//                                    .setOnShowcaseEventListener(new OnShowcaseEventListener() {
-//                                        @Override
-//                                        public void onShowcaseViewHide(ShowcaseView showcaseView) {
-//
-//                                        }
-//
-//                                        @Override
-//                                        public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-//
-//                                            CommonUtils.showShowCaseView(getActivity(), R.id.tvDeviceName, "If collecting data offline, sync saved data + update projects once you have internet access", "");
-//                                        }
-//
-//                                        @Override
-//                                        public void onShowcaseViewShow(ShowcaseView showcaseView) {
-//
-//                                        }
-//                                    });
-//
-//                        }
-//
-//                        @Override
-//                        public void onShowcaseViewShow(ShowcaseView showcaseView) {
-//
-//                        }
-//                    });
-
         }
 
         // Defer code dependent on restoration of previous instance state.
@@ -375,7 +286,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void selectItem(int position) {
         mCurrentSelectedPosition = position;
-        if(position < 5) {
+        if(position < 6) {
             if (mDrawerListView != null) {
                 mDrawerListView.setItemChecked(position, true);
                 mNavigationAdapter.setItemSelected(position);
@@ -457,11 +368,6 @@ public class NavigationDrawerFragment extends Fragment {
     public void setDeviceConnected(String deviceName, String deviceAddress) {
         tvDeviceName.setText(deviceName);
         tvDeviceAddress.setText(deviceAddress);
-
-//        if (deviceName.equals("Tap to connect device")) {
-//            mTourGuideHandler = CommonUtils.showShowCaseView(getActivity(), R.id.tvDeviceName, "First, pair your measurement device", "");
-//        }
-
     }
 
     /**
@@ -519,34 +425,5 @@ public class NavigationDrawerFragment extends Fragment {
         public void setItemSelected(int position) {
             mSelectedPosition = position;
         }
-    }
-
-    public void onResume() {
-        super.onResume();
-//        Thread t = new Thread() {
-//
-//            @Override
-//            public void run() {
-//                try {
-//                    while (!isInterrupted()) {
-//                        Thread.sleep(1000);
-//                        if (getActivity() != null) {
-//                            getActivity().runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    db = DatabaseHelper.getHelper(getActivity());
-//                                    final List<ProjectResult> listRecords = db.getAllUnUploadedResults();
-//                                    String totalCachedDataPoints = PrefUtils.getFromPrefs(getActivity(), PrefUtils.PREFS_TOTAL_CACHED_DATA_POINTS, "0");
-//                                    totalDataPointsBtn.setText("" + listRecords.size());
-//                                }
-//                            });
-//                        }
-//                    }
-//                } catch (InterruptedException e) {
-//                }
-//            }
-//        };
-//
-//        t.start();
     }
 }

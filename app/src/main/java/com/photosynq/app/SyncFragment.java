@@ -41,7 +41,6 @@ import com.photosynq.app.utils.Constants;
 import com.photosynq.app.utils.PrefUtils;
 import com.photosynq.app.utils.SyncHandler;
 import com.squareup.picasso.Picasso;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,7 +48,7 @@ import java.util.Calendar;
 import java.util.List;
 
 
-public class SyncFragment extends Fragment implements PhotosynqResponse {
+public class SyncFragment extends Fragment implements PhotosynqResponse{
     /**
      * The fragment argument representing the section number for this
      * fragment.
@@ -68,7 +67,6 @@ public class SyncFragment extends Fragment implements PhotosynqResponse {
     Timer timer;
 
     private TextView tvAutoSyncCachedDataPtValue;
-
     /**
      * Returns a new instance of this fragment for the given section
      * number.
@@ -108,29 +106,31 @@ public class SyncFragment extends Fragment implements PhotosynqResponse {
 
         cbAutoSyncWifiOnly = (CheckBox) rootView.findViewById(R.id.auto_sync_wifi_checkbox);
         String isCheckedWifiSync = PrefUtils.getFromPrefs(getActivity(), PrefUtils.PREFS_SYNC_WIFI_ON, PrefUtils.PREFS_DEFAULT_VAL);
-        if (isCheckedWifiSync.equals("1")) {
+        if(isCheckedWifiSync.equals("1")){
             cbAutoSyncWifiOnly.setChecked(true);
-        } else {
+        }else{
             cbAutoSyncWifiOnly.setChecked(false);
         }
         tvAutoSyncCachedDataPtValue = (TextView) rootView.findViewById(R.id.tv_data_points_value);
         tvAutoSyncCachedDataPtValue.setTypeface(CommonUtils.getInstance(getActivity()).getFontRobotoRegular());
-        final DatabaseHelper db = DatabaseHelper.getHelper(getActivity());
-        //List<ProjectResult> listRecords = db.getAllUnUploadedResults();
-        int recordCount = db.getAllUnuploadedResultsCount(null);
-        PrefUtils.saveToPrefs(getActivity(), PrefUtils.PREFS_TOTAL_CACHED_DATA_POINTS, "" + recordCount);
+        DatabaseHelper db = DatabaseHelper.getHelper(getActivity());
+        final List<ProjectResult> listRecords = db.getAllUnUploadedResults();
+        PrefUtils.saveToPrefs(getActivity(), PrefUtils.PREFS_TOTAL_CACHED_DATA_POINTS, ""+listRecords.size());
 
         //set total of cached points.
-        tvAutoSyncCachedDataPtValue.setText(recordCount + "");
+        if(listRecords.size() > 0) {
+            tvAutoSyncCachedDataPtValue.setText(listRecords.size() + "");
+        }else{
+            tvAutoSyncCachedDataPtValue.setText("0");
+        }
 
         tvAutoSyncCachedDataPtValue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                int recordCount = db.getAllUnuploadedResultsCount(null);
-                if (recordCount == 0) {
+                if(listRecords.size() == 0) {
                     Toast.makeText(getActivity(), "No cached data point", Toast.LENGTH_SHORT).show();
-                } else {
+                }else {
                     Intent intent = new Intent(getActivity(), DisplayCachedDataPoints.class);
                     startActivity(intent);
                 }
@@ -147,12 +147,12 @@ public class SyncFragment extends Fragment implements PhotosynqResponse {
         intervalSpinner.setAdapter(adapter);
 
 
-        String get_interval_time = PrefUtils.getFromPrefs(getActivity(), PrefUtils.PREFS_SAVE_SYNC_INTERVAL, "2");
+        String get_interval_time = PrefUtils.getFromPrefs(getActivity(), PrefUtils.PREFS_SAVE_SYNC_INTERVAL,"2");
         PrefUtils.saveToPrefs(getActivity(), "PrevSyncIntervalTime", get_interval_time);
         int sync_iterval = 2;
         try {
             sync_iterval = Integer.parseInt(get_interval_time);
-        } catch (NumberFormatException nfe) {
+        } catch(NumberFormatException nfe) {
             System.out.println("Could not parse " + nfe);
         }
         switch (sync_iterval) {
@@ -227,8 +227,6 @@ public class SyncFragment extends Fragment implements PhotosynqResponse {
         syncBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO this has known problem of getting stuck when user is somehow able to submit sync,
-                // or think about if user starts sync and next moment auto sync yields - Shekhar
 
                 final Context context = getActivity();
 
@@ -285,7 +283,7 @@ public class SyncFragment extends Fragment implements PhotosynqResponse {
                                     SyncHandler syncHandler = new SyncHandler(mainActivity);
                                     syncHandler.DoSync(SyncHandler.ALL_SYNC_UI_MODE_CLEAR_CACHE);
                                 }
-                            } else if (clickCounter == 1) {
+                            }else if (clickCounter == 1) {
                                 if (cbAutoSyncWifiOnly.isChecked()) {
                                     PrefUtils.saveToPrefs(getActivity(), PrefUtils.PREFS_SYNC_WIFI_ON, "1");//set 1 if wifi is connected
                                     ConnectivityManager connManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -323,23 +321,27 @@ public class SyncFragment extends Fragment implements PhotosynqResponse {
         return rootView;
     }
 
-    public void refresh() {
+    public void refresh(){
 
         DatabaseHelper db = DatabaseHelper.getHelper(getActivity());
-        int recordCount = db.getAllUnuploadedResultsCount(null);
-        PrefUtils.saveToPrefs(getActivity(), PrefUtils.PREFS_TOTAL_CACHED_DATA_POINTS, "" + recordCount);
+        final List<ProjectResult> listRecords = db.getAllUnUploadedResults();
+        PrefUtils.saveToPrefs(getActivity(), PrefUtils.PREFS_TOTAL_CACHED_DATA_POINTS, ""+listRecords.size());
 
         //set total of cached points.
-        tvAutoSyncCachedDataPtValue.setText(recordCount + "");
+        if(listRecords.size() > 0) {
+            tvAutoSyncCachedDataPtValue.setText(listRecords.size() + "");
+        }else {
+            tvAutoSyncCachedDataPtValue.setText("0");
+        }
     }
 
     public void startSyncService(long set_interval_time) {
 
-        String get_interval_time = PrefUtils.getFromPrefs(getActivity(), "PrevSyncIntervalTime", "2");
+        String get_interval_time = PrefUtils.getFromPrefs(getActivity(), "PrevSyncIntervalTime","2");
         int prev_sync_iterval = 2;
         try {
             prev_sync_iterval = Integer.parseInt(get_interval_time);
-        } catch (NumberFormatException nfe) {
+        } catch(NumberFormatException nfe) {
             System.out.println("Could not parse " + nfe);
         }
 
@@ -403,7 +405,7 @@ public class SyncFragment extends Fragment implements PhotosynqResponse {
 //                        "Check if wifi is turned on \n" +
 //                        "and if networks are available in your system settings screen. ", Toast.LENGTH_LONG).show();
 //            }
-        } else {//Mobile Data
+        }else{//Mobile Data
             PrefUtils.saveToPrefs(getActivity(), PrefUtils.PREFS_SYNC_WIFI_ON, "0");//set 0 if wifi is not connected
 //            startSyncService(set_interval_time);
         }
@@ -413,53 +415,10 @@ public class SyncFragment extends Fragment implements PhotosynqResponse {
 
     @Override
     public void onResponseReceived(String result) {
-        if (result.equals(Constants.SERVER_NOT_ACCESSIBLE)) {
+        if(result.equals(Constants.SERVER_NOT_ACCESSIBLE)){
             Toast.makeText(getActivity(), R.string.server_not_reachable, Toast.LENGTH_LONG).show();
-        } else {
+        }else {
             //??
         }
-    }
-
-    public void onResume() {
-        super.onResume();
-        DatabaseHelper db = DatabaseHelper.getHelper(getActivity());
-        int recordCount = db.getAllUnuploadedResultsCount(null);
-
-        tvAutoSyncCachedDataPtValue.setText(recordCount + "");
-
-
-//        Thread t = new Thread() {
-//
-//            @Override
-//            public void run() {
-//                try {
-//                    while (!isInterrupted()) {
-//                        Thread.sleep(1000);
-//                        if (getActivity() != null) {
-//                            getActivity().runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    try {
-//                                        DatabaseHelper db = DatabaseHelper.getHelper(getActivity());
-//                                        int recordCount = db.getAllUnuploadedResultsCount(null);
-//                                        PrefUtils.saveToPrefs(getActivity(), PrefUtils.PREFS_TOTAL_CACHED_DATA_POINTS, "" + recordCount);
-//
-//                                        //set total of cached points.
-//                                        if (recordCount > 0) {
-//                                            tvAutoSyncCachedDataPtValue.setText(recordCount + "");
-//                                        } else {
-//                                            tvAutoSyncCachedDataPtValue.setText("0");
-//                                        }
-//                                    }catch (Exception e){}
-//                                }
-//                            });
-//                        }
-//                    }
-//                } catch (InterruptedException e) {
-//                }
-//            }
-//        };
-//
-//        t.start();
     }
 }

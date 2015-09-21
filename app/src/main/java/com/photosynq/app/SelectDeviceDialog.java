@@ -5,20 +5,16 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.Display;
@@ -38,8 +34,6 @@ import android.widget.Toast;
 
 import com.photosynq.app.db.DatabaseHelper;
 import com.photosynq.app.model.AppSettings;
-import com.photosynq.app.model.BluetoothMessage;
-import com.photosynq.app.utils.BluetoothService;
 import com.photosynq.app.utils.CommonUtils;
 import com.photosynq.app.utils.PrefUtils;
 
@@ -53,7 +47,6 @@ import java.util.Set;
  */
 public class SelectDeviceDialog extends DialogFragment {
 
-    SelectDeviceDialogDelegate mSelectDeviceDialogDelegate;
     BluetoothAdapter bluetoothAdapter;
     ListView pairedDeviceList;
     View bluetoothStatus;
@@ -99,12 +92,6 @@ public class SelectDeviceDialog extends DialogFragment {
         closeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                String deviceAddress = CommonUtils.getDeviceAddress(getActivity());
-                if (mSelectDeviceDialogDelegate != null){
-                    mSelectDeviceDialogDelegate.onDeviceSelected( deviceAddress);
-                }
-
                 dismiss();
             }
         });
@@ -125,12 +112,7 @@ public class SelectDeviceDialog extends DialogFragment {
             btDeviceList.add(device);
             if(null != appSettings.getConnectionId() && appSettings.getConnectionId().equals(device.getAddress()))
             {
-                try {
-                    ((MainActivity) getActivity()).setDeviceConnected(device.getName(), appSettings.getConnectionId());
-                }catch (Exception e){
-
-                    ((ProjectMeasurmentActivity) getActivity()).setDeviceConnected(device.getName(), appSettings.getConnectionId());
-                }
+                ((MainActivity) getActivity()).setDeviceConnected(device.getName(), appSettings.getConnectionId());
             }
         }
 
@@ -148,11 +130,6 @@ public class SelectDeviceDialog extends DialogFragment {
                     String bluetoothID = btDevice.getAddress();
                     appSettings.setConnectionId(bluetoothID);
                     databaseHelper.updateSettings(appSettings);
-
-                    BluetoothMessage bluetoothMessage = new BluetoothMessage();
-                    BluetoothService mBluetoothService = BluetoothService.getInstance(bluetoothMessage, mHandler);
-                    mBluetoothService.stop();
-
 //                    String first_run = PrefUtils.getFromPrefs(getActivity(), PrefUtils.PREFS_FIRST_INSTALL_CYCLE, "YES");
 //                    if( first_run.equals("YES")) {
 //                        Bundle bundle = new Bundle();
@@ -164,6 +141,10 @@ public class SelectDeviceDialog extends DialogFragment {
 //                        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, fragment.getClass().getName()).commit();
 //                    }
 
+                    if (null != appSettings.getConnectionId()) {
+                        ((MainActivity) getActivity()).setDeviceConnected(btDevice.getName(), appSettings.getConnectionId());
+
+                    }
 
                     pairedDeviceList.setItemsCanFocus(true);
 
@@ -171,16 +152,8 @@ public class SelectDeviceDialog extends DialogFragment {
                     radiolistitem.setChecked(true);
 
                     btArrayAdapter.notifyDataSetInvalidated();
-
-                    if (null != appSettings.getConnectionId()) {
-                        ((MainActivity) getActivity()).setDeviceConnected(btDevice.getName(), appSettings.getConnectionId());
-
-                    }
-
-
                 } catch (Exception e) {
 
-                    System.out.println(e.getMessage());
                 }
             }
         });
@@ -197,20 +170,6 @@ public class SelectDeviceDialog extends DialogFragment {
         getDialog().getWindow().setLayout(width, height);
 
         return rootView;
-    }
-
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-
-        }
-    };
-
-    public void show(android.support.v4.app.FragmentManager manager, String tag, SelectDeviceDialogDelegate selectDeviceDialogDelegate) {
-        super.show(manager, tag);
-
-        mSelectDeviceDialogDelegate = selectDeviceDialogDelegate;
-
     }
 
     public boolean createBond(BluetoothDevice btDevice)
@@ -238,23 +197,8 @@ public class SelectDeviceDialog extends DialogFragment {
 
                 System.out.println("\nBluetooth is enabled...");
 
-                new AlertDialog.Builder(getActivity())
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setMessage("Please make sure the device is turned on, and press ok to begin search")
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int which) {
-
-                                        // Starting the device discovery
-                                        bluetoothAdapter.startDiscovery();
-
-                                    }
-
-                                }
-
-                        )
-                        .show();
-
+                // Starting the device discovery
+                bluetoothAdapter.startDiscovery();
             } else {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, 1);
@@ -435,6 +379,7 @@ public class SelectDeviceDialog extends DialogFragment {
                     }
 
                 } catch (Exception e) {
+                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -453,6 +398,7 @@ public class SelectDeviceDialog extends DialogFragment {
                         tvDevicePaired.setText((bluetoothDevice.getBondState() == 10) ? "Not Paired" : (bluetoothDevice.getBondState() == 12) ? "Paired" : "Pairing");
 
                     }catch(Exception e){
+                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 }

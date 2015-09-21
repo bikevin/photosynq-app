@@ -19,9 +19,9 @@ import android.widget.Toast;
 import com.photosynq.app.db.DatabaseHelper;
 import com.photosynq.app.model.AppSettings;
 import com.photosynq.app.model.Data;
+import com.photosynq.app.model.ProjectCreator;
 import com.photosynq.app.model.Question;
 import com.photosynq.app.model.ResearchProject;
-import com.photosynq.app.questions.QuestionsList;
 import com.photosynq.app.utils.CommonUtils;
 import com.photosynq.app.utils.Constants;
 import com.photosynq.app.utils.PrefUtils;
@@ -52,11 +52,6 @@ public class ProjectDetailsActivity extends ActionBarActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle("");
 
-//        String isShowed = PrefUtils.getFromPrefs(this, "IsFirstProjectDetailsActivity", "FALSE");
-//        if (isShowed.equals("FALSE")) {
-//            CommonUtils.showShowCaseView(this, R.id.btn_take_measurement, "To collect data, choose a project, follow directions, answer questions, and take sensor measurement", "");
-//            PrefUtils.saveToPrefs(this, "IsFirstProjectDetailsActivity", "TRUE");
-//        }
 
         DatabaseHelper databaseHelper = DatabaseHelper.getHelper(this);
         Bundle extras = getIntent().getExtras();
@@ -69,14 +64,15 @@ public class ProjectDetailsActivity extends ActionBarActivity {
             ImageView projectImage = (ImageView) findViewById(R.id.im_projectImage);
             Picasso.with(this)
                     .load(project.getImageUrl())
-                    .error(R.drawable.ic_launcher1)
+                    .error(R.drawable.ic_launcher)
                     .into(projectImage);
 
             ImageView profileImage = (ImageView) findViewById(R.id.user_profile_image);
-            String imageUrl = project.getLead_avatar();
+            ProjectCreator projectLead = databaseHelper.getProjectLead(project.getCreatorId());
+            String imageUrl = projectLead.getImageUrl();
             Picasso.with(this)
                     .load(imageUrl)
-                    .error(R.drawable.ic_launcher1)
+                    .error(R.drawable.ic_launcher)
                     .into(profileImage);
 
             Typeface tfRobotoRegular = CommonUtils.getInstance(this).getFontRobotoRegular();
@@ -187,24 +183,54 @@ public class ProjectDetailsActivity extends ActionBarActivity {
             }
         }
 
-//        Intent intent = new Intent(this, ProjectMeasurmentActivity.class);
-//        intent.putExtra(DatabaseHelper.C_PROJECT_ID, projectID);
-//        startActivityForResult(intent, 555);
-        Intent intent = new Intent(this, QuestionsList.class);
+        Intent intent = new Intent(this, ProjectMeasurmentActivity.class);
         intent.putExtra(DatabaseHelper.C_PROJECT_ID, projectID);
-        startActivityForResult(intent, 555);
+        startActivity(intent);
+    }
 
+    public void join_team_click(View view){
 
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.menu_project_details, menu);
+        return true;
+    }
 
-        if (resultCode == 555) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
 
-            setResult(555);
-            finish();
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+
+            DatabaseHelper databaseHelper = DatabaseHelper.getHelper(this);
+            List<Question> questions = databaseHelper.getAllQuestionForProject(projectID);
+            if(questions.size() <= 0)
+            {
+                Toast.makeText(this, "No Questions for project selected", Toast.LENGTH_LONG).show();
+
+            }else {
+
+                Intent intent = new Intent(this, ProjectDataActivity.class);
+                intent.putExtra(DatabaseHelper.C_PROJECT_ID, projectID);
+                startActivity(intent);
+            }
+
+            return true;
         }
+
+        if (id == android.R.id.home){
+
+            finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

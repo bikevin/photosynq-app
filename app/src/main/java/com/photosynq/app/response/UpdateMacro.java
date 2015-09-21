@@ -1,6 +1,5 @@
 package com.photosynq.app.response;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -26,11 +25,11 @@ import java.util.List;
  */
 public class UpdateMacro implements PhotosynqResponse {
 
-    private Activity context;
+    private Context context;
     private MainActivity navigationDrawer;
     private ProgressDialog mProgressDialog;
 
-    public UpdateMacro(Activity context, MainActivity navigationDrawer, ProgressDialog progressDialog)
+    public UpdateMacro(Context context, MainActivity navigationDrawer, ProgressDialog progressDialog)
     {
         this.context = context;
         this.navigationDrawer = navigationDrawer;
@@ -65,6 +64,8 @@ public class UpdateMacro implements PhotosynqResponse {
         System.out.println("UpdateMacro Start onResponseReceived: " + date.getTime());
 
         DatabaseHelper db = DatabaseHelper.getHelper(navigationDrawer);
+//        db.openWriteDatabase();
+//        db.openReadDatabase();
         JSONArray jArray;
 
         if (null != result) {
@@ -78,6 +79,8 @@ public class UpdateMacro implements PhotosynqResponse {
                         }
                     });
                 }
+//                db.closeWriteDatabase();
+//                db.closeReadDatabase();
                 return;
             }
 
@@ -106,6 +109,28 @@ public class UpdateMacro implements PhotosynqResponse {
             }
         }
 
+        // Writing macros.js file with all macro functions
+        StringBuffer dataString = new StringBuffer();
+        List<Macro> macros = db.getAllMacros();
+        for (Macro macro : macros) {
+            dataString.append("function macro_" + macro.getId() + "(json){");
+            dataString.append(System.getProperty("line.separator"));
+            dataString.append(macro.getJavascriptCode().replaceAll("\\r\\n", System.getProperty("line.separator"))); //replacing ctrl+m characters
+            dataString.append(System.getProperty("line.separator") + " }");
+            dataString.append(System.getProperty("line.separator"));
+            dataString.append(System.getProperty("line.separator"));
+        }
+        System.out.println("###### writing macros :......");
+
+        if (null == navigationDrawer){
+
+            CommonUtils.writeStringToFile(context, "macros.js", dataString.toString());
+        }else{
+
+            CommonUtils.writeStringToFile(navigationDrawer, "macros.js", dataString.toString());
+        }
+//        db.closeWriteDatabase();
+//        db.closeReadDatabase();
         Date date1 = new Date();
 
         if(null != navigationDrawer) {
@@ -120,6 +145,6 @@ public class UpdateMacro implements PhotosynqResponse {
         System.out.println("UpdateMacro End onResponseReceived: " + date1.getTime());
 
         //show progress dialog process on sync screen after sync button click
-        CommonUtils.setProgress(context, mProgressDialog, 20);
+        CommonUtils.setProgress(navigationDrawer, mProgressDialog, 20);
     }
 }
