@@ -23,13 +23,13 @@ public class AlarmReceiver extends BroadcastReceiver
 
             if (mWifi != null && mWifi.isConnected()) {//if Wifi is connected
 
-                SyncHandler syncHandler = new SyncHandler(context);
-                syncHandler.DoSync();
+                SyncHandler syncHandler = new SyncHandler(context, MainActivity.getProgressBar());
+                syncHandler.DoSync(SyncHandler.ALL_SYNC_MODE);
             }
         }else{
 
-            SyncHandler syncHandler = new SyncHandler(context);
-            syncHandler.DoSync();
+            SyncHandler syncHandler = new SyncHandler(context, MainActivity.getProgressBar());
+            syncHandler.DoSync(SyncHandler.ALL_SYNC_MODE);
         }
 
        System.out.println("----------------------sync data onReceive complete-----------------");

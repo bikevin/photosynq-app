@@ -3,12 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
     android:background="@color/navigation_drawer"
+    android:orientation="vertical"
     android:clickable="true"
     android:focusable="true"
-    android:focusableInTouchMode="true"
-    android:gravity="center_horizontal"
-    android:orientation="vertical">
+    android:focusableInTouchMode="true">
 
 
     <LinearLayout
@@ -22,19 +22,20 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_gravity="center"
+            android:layout_marginTop="30dp"
             android:layout_marginBottom="10dp"
-            android:layout_marginTop="20dp"
-            android:src="@drawable/ic_launcher1" />
+            android:src="@drawable/ic_launcher" />
 
         <TextView
             android:id="@+id/tvUserName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginBottom="20dp"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:layout_marginBottom="50dp"
+            android:textSize="20sp"
+            android:textColor="@color/white" />
     </LinearLayout>
+
 
     <ListView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -53,92 +54,26 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:background="@color/navigation_drawer_background"
+            android:layout_alignParentBottom="true"
             android:orientation="vertical">
-
-            <TableLayout
-                android:id="@+id/tableLayout1"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
-
-                <TableRow
-                    android:id="@+id/sync_with_server_btn_menu_bar"
-                    android:layout_width="fill_parent"
-                    android:layout_height="35dp"
-                    android:background="@drawable/btn_layout_orange">
-
-                    <RelativeLayout
-                        android:layout_height="fill_parent"
-                        android:layout_width="fill_parent">
-
-                        <TextView
-                            android:id="@+id/syncWithServerMenu"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginTop="5dp"
-                            android:text="Sync with server"
-                            android:textColor="@color/white"
-                            android:textSize="18sp" />
-
-                        <Button
-                            android:id="@+id/totalCachedDataPointsBtn"
-                            android:layout_toRightOf="@id/syncWithServerMenu"
-                            android:layout_toEndOf="@id/syncWithServerMenu"
-                            android:layout_width="50dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginStart="40dp"
-                            android:layout_marginLeft="40dp"
-                            android:layout_marginEnd="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_alignParentRight="true"
-                            android:layout_alignParentEnd="true"
-                            android:textSize="16sp"
-                            android:textColor="@color/black"
-                            android:background="@drawable/btn_layout_white"
-                            android:text="0" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/totalCachedDataPointsBtn"
-                            android:layout_marginTop="0dp"
-                            android:layout_marginEnd="5dp"
-                            android:layout_marginRight="10dp"
-                            android:layout_marginBottom="5dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentRight="true"
-                            android:text="Cached"
-                            android:textColor="@color/white"
-                            android:textSize="12sp" />
-
-
-
-                    </RelativeLayout>
-
-                </TableRow>
-            </TableLayout>
 
             <TextView
                 android:id="@+id/tvDeviceName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:text="Device not connected"
+                android:textColor="@color/textPrimaryLight"
                 android:layout_marginTop="10dp"
-                android:text="Tap to connect device"
-                android:textColor="@color/textPrimaryLight" />
+                android:layout_marginLeft="10dp" />
 
             <TextView
                 android:id="@+id/tvDeviceAddress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
+                android:textColor="@color/textPrimary"
                 android:layout_marginLeft="10dp"
-                android:textColor="@color/textPrimary" />
+                android:layout_marginBottom="10dp" />
 
         </LinearLayout>
     </RelativeLayout>

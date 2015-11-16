@@ -1,15 +1,6 @@
 package com.photosynq.app.model;
 
-import android.util.Log;
-
 import com.photosynq.app.utils.CommonUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Protocol {
 
@@ -25,8 +16,6 @@ public class Protocol {
 	private String macroId;
 	private String slug;
 	private String mPreSelected;
-	private int measurements;
-	private int protocols;
 
     public Protocol()
 	{
@@ -42,14 +31,7 @@ public class Protocol {
 		this.slug = slug;
 		this.recordHash = getProtocolRecordHash();
         this.mPreSelected = preSelected;
-		this.measurements = extractIntValue("measurements");
-		if (this.measurements == 0){
-			this.measurements = 1;
-		}
-		this.protocols = extractIntValue("protocols");
-
 	}
-
 	private String getProtocolRecordHash() {
 		String recordString = (null != getId() ? getId(): "") 
 				+ (null != getName()? getName() : "" )
@@ -101,12 +83,6 @@ public class Protocol {
 	}
 	public void setProtocol_json(String protocol_json) {
 		this.protocol_json = protocol_json;
-
-		this.measurements = extractIntValue("measurements");
-		if (this.measurements == 0){
-			this.measurements = 1;
-		}
-		this.protocols = extractIntValue("protocols");
 	}
     public String getPreSelected(){
         return mPreSelected;
@@ -120,32 +96,4 @@ public class Protocol {
 
         return false;
     }
-	public int getMeasurements() {
-		return measurements;
-	}
-	public void setMeasurements(int measurements) {
-		this.measurements = measurements;
-	}
-	public int getProtocols() {
-		return protocols;
-	}
-	public void setProtocols(int protocols) {
-		this.protocols = protocols;
-	}
-
-	private int extractIntValue(String fieldName){
-		int retVal = 0;
-
-		try {
-			JSONObject jArray = new JSONObject(protocol_json);
-
-			String value = jArray.getString(fieldName);
-			retVal = Integer.parseInt(value);
-
-		} catch (JSONException e) {
-			//e.printStackTrace();
-			Logger.getAnonymousLogger().log(Level.INFO,"No value for field: "+fieldName);
-		}
-		return retVal;
-	}
 }

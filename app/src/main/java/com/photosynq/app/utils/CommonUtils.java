@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -16,13 +15,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.TranslateAnimation;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.photosynq.app.MainActivity;
@@ -143,7 +135,7 @@ public class CommonUtils {
                 urlc.connect();
                 return (urlc.getResponseCode() == 200);
             } catch (IOException e) {
-                //PrefUtils.saveToPrefs(context, PrefUtils.PREFS_IS_SYNC_IN_PROGRESS, "false");
+                PrefUtils.saveToPrefs(context, PrefUtils.PREFS_IS_SYNC_IN_PROGRESS, "false");
                 Log.e("Connectivity", "Error checking internet connection", e);
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(
@@ -168,7 +160,7 @@ public class CommonUtils {
                 );
             }
         } else {
-            //PrefUtils.saveToPrefs(context, PrefUtils.PREFS_IS_SYNC_IN_PROGRESS, "false");
+            PrefUtils.saveToPrefs(context, PrefUtils.PREFS_IS_SYNC_IN_PROGRESS, "false");
             Log.d("Connectivity", "You are not connect to a network.");
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(
@@ -222,108 +214,88 @@ public class CommonUtils {
         return md5;
     }
 
-    public synchronized static void uploadResults(final Context context, final int projectId){
+    public synchronized static void uploadResults(final Context context){
 
         new AsyncTask<Object, Object, Object>() {
             @Override
             protected Object doInBackground(Object[] objects) {
+
                 DatabaseHelper db = DatabaseHelper.getHelper(context);
-                String offsetid = "0";
-                int totalrecords = db.getAllUnuploadedResultsCount(null);
-                //TODO change batch from 5 to 100 -shekhar
-                for(int recordsloop = 0; recordsloop < Math.ceil((double)totalrecords/5); recordsloop++) {
-                    int index = 1;
+                List<ProjectResult> listRecords = db.getAllUnUploadedResults();
+                for (ProjectResult projectResult : listRecords) {
 
-                    List<ProjectResult> listRecords = db.getAllUnUploadedResults(5, offsetid);
-                    for (ProjectResult projectResult : listRecords) {
+                    String project_id = projectResult.getProjectId();
+                    String row_id = projectResult.getId();
+                    String result = projectResult.getReading();
 
-                        String project_id = projectResult.getProjectId();
+                    if (!result.contains("user_answers")){
 
-                        if (projectId != -1) {
-
-                            if (!project_id.equals("" + projectId)) {
-
-                                continue;
-                            }
-                        }
-
-                        if (index == listRecords.size()) {
-                            offsetid = projectResult.getId();
-                        }
-                        String row_id = projectResult.getId();
-                        String result = projectResult.getReading();
-
-                        if (!result.contains("user_answers")) {
-
-                            Log.d("PhotosynQ", result);
-                        }
-
-
-                        String authToken = PrefUtils.getFromPrefs(context, PrefUtils.PREFS_AUTH_TOKEN_KEY, PrefUtils.PREFS_DEFAULT_VAL);
-                        String email = PrefUtils.getFromPrefs(context, PrefUtils.PREFS_LOGIN_USERNAME_KEY, PrefUtils.PREFS_DEFAULT_VAL);
-                        StringEntity input = null;
-                        String responseString = null;
-                        JSONObject request_data = new JSONObject();
-
-                        try {
-                            JSONObject jo = new JSONObject(result);
-                            request_data.put("user_email", email);
-                            request_data.put("user_token", authToken);
-                            request_data.put("data", jo);
-                            input = new StringEntity(request_data.toString());
-                            input.setContentType("application/json");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            continue;
-                            //??return Constants.SERVER_NOT_ACCESSIBLE;
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                            continue;
-                            //??return Constants.SERVER_NOT_ACCESSIBLE;
-                        }
-
-                        String strDataURI = Constants.PHOTOSYNQ_DATA_URL
-                                + project_id + "/data.json";
-
-                        Log.d("commonutils", "$$$$ URI" + strDataURI);
-
-                        HttpPost postRequest = new HttpPost(strDataURI);
-                        if (null != input) {
-                            postRequest.setEntity(input);
-                        }
-                        Log.d("commonutils", "$$$$ Executing POST request");
-                        HttpClient httpclient = new DefaultHttpClient();
-                        try {
-                            HttpResponse response = httpclient.execute(postRequest);
-
-                            if (null != response) {
-                                StatusLine statusLine = response.getStatusLine();
-                                if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-                                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                                    response.getEntity().writeTo(out);
-                                    out.close();
-                                    responseString = out.toString();
-                                } else {
-                                    //Closes the connection.
-                                    response.getEntity().getContent().close();
-                                    throw new IOException(statusLine.getReasonPhrase());
-                                }
-                            }
-
-                            UpdateData updateData = new UpdateData(context, row_id);
-                            updateData.onResponseReceived(responseString);
-
-                        } catch (ClientProtocolException e) {
-                            continue;
-                            //??return Constants.SERVER_NOT_ACCESSIBLE;
-                        } catch (IOException e) {
-                            continue;
-                            //??return Constants.SERVER_NOT_ACCESSIBLE;
-                        }
-
-                        index++;
-
+                        Log.d("PhotosynQ", result);
                     }
+
+
+                    String authToken = PrefUtils.getFromPrefs(context, PrefUtils.PREFS_AUTH_TOKEN_KEY, PrefUtils.PREFS_DEFAULT_VAL);
+                    String email = PrefUtils.getFromPrefs(context, PrefUtils.PREFS_LOGIN_USERNAME_KEY, PrefUtils.PREFS_DEFAULT_VAL);
+                    StringEntity input = null;
+                    String responseString = null;
+                    JSONObject request_data = new JSONObject();
+
+                    try {
+                        JSONObject jo = new JSONObject(result);
+                        request_data.put("user_email", email);
+                        request_data.put("user_token", authToken);
+                        request_data.put("data", jo);
+                        input = new StringEntity(request_data.toString());
+                        input.setContentType("application/json");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        continue;
+                        //??return Constants.SERVER_NOT_ACCESSIBLE;
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                        continue;
+                        //??return Constants.SERVER_NOT_ACCESSIBLE;
+                    }
+
+                    String strDataURI = Constants.PHOTOSYNQ_DATA_URL
+                            + project_id + "/data.json";
+
+                    Log.d("PHOTOSYNQ-HTTPConnection", "$$$$ URI" + strDataURI);
+
+                    HttpPost postRequest = new HttpPost(strDataURI);
+                    if (null != input) {
+                        postRequest.setEntity(input);
+                    }
+                    Log.d("PHOTOSYNQ-HTTPConnection", "$$$$ Executing POST request");
+                    HttpClient httpclient = new DefaultHttpClient();
+                    try {
+                        HttpResponse response = httpclient.execute(postRequest);
+
+                        if (null != response) {
+                            StatusLine statusLine = response.getStatusLine();
+                            if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+                                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                                response.getEntity().writeTo(out);
+                                out.close();
+                                responseString = out.toString();
+                            } else {
+                                //Closes the connection.
+                                response.getEntity().getContent().close();
+                                throw new IOException(statusLine.getReasonPhrase());
+                            }
+                        }
+
+                        UpdateData updateData = new UpdateData(context, row_id);
+                        updateData.onResponseReceived(responseString);
+
+                    } catch (ClientProtocolException e) {
+                        continue;
+                        //??return Constants.SERVER_NOT_ACCESSIBLE;
+                    } catch (IOException e) {
+                        continue;
+                        //??return Constants.SERVER_NOT_ACCESSIBLE;
+                    }
+
                 }
                 return Constants.SUCCESS;
             }
@@ -366,33 +338,33 @@ public class CommonUtils {
         return appSettings.getConnectionId();
     }
 
-//    public static String getAutoIncrementedValue(Context ctx,String question_id, String index) {
-//        if(Integer.parseInt(index) == -1) {
-//            return "-2";
-//        }
-//
-//        String userId = PrefUtils.getFromPrefs(ctx , PrefUtils.PREFS_LOGIN_USERNAME_KEY, PrefUtils.PREFS_DEFAULT_VAL);
-//        DatabaseHelper db = DatabaseHelper.getHelper(ctx);
-//        String projectId = db.getSettings(userId).getProjectId();
-//        Question question = db.getQuestionForProject(projectId, question_id);
-//        Data data = db.getData(userId, projectId, question.getQuestionId());
-//        String[] items = data.getValue().split(",");
-//        int from = Integer.parseInt(items[0]);
-//        int to = Integer.parseInt(items[1]);
-//        int repeat = Integer.parseInt(items[2]);
-//        ArrayList<Integer> populatedValues = new ArrayList<Integer>();
-//        for(int i=from;i<=to;i++){
-//            for(int j=0;j<repeat;j++){
-//                populatedValues.add(i);
-//
-//            }
-//        }
-//
-//        if(Integer.parseInt(index) > populatedValues.size()-1)
-//            return "-1";
-//
-//        return populatedValues.get(Integer.parseInt(index)).toString();
-//    }
+    public static String getAutoIncrementedValue(Context ctx,String question_id, String index) {
+        if(Integer.parseInt(index) == -1) {
+            return "-2";
+        }
+
+        String userId = PrefUtils.getFromPrefs(ctx , PrefUtils.PREFS_LOGIN_USERNAME_KEY, PrefUtils.PREFS_DEFAULT_VAL);
+        DatabaseHelper db = DatabaseHelper.getHelper(ctx);
+        String projectId = db.getSettings(userId).getProjectId();
+        Question question = db.getQuestionForProject(projectId, question_id);
+        Data data = db.getData(userId, projectId, question.getQuestionId());
+        String[] items = data.getValue().split(",");
+        int from = Integer.parseInt(items[0]);
+        int to = Integer.parseInt(items[1]);
+        int repeat = Integer.parseInt(items[2]);
+        ArrayList<Integer> populatedValues = new ArrayList<Integer>();
+        for(int i=from;i<=to;i++){
+            for(int j=0;j<repeat;j++){
+                populatedValues.add(i);
+
+            }
+        }
+
+        if(Integer.parseInt(index) > populatedValues.size()-1)
+            return "-1";
+
+        return populatedValues.get(Integer.parseInt(index)).toString();
+    }
 
     public static Date convertToDate(String rawdate)
     {
@@ -409,20 +381,23 @@ public class CommonUtils {
 
     }
 
-
-
     public static void setProgress(final Activity context, ProgressDialog progressDialog, int progressValue){
-       if(progressDialog != null && context != null) {
+       if(progressDialog != null) {
 
+           String progressStr = PrefUtils.getFromPrefs(context, "SyncProgress", "0");
+           int progress = Integer.parseInt(progressStr);
+
+           PrefUtils.saveToPrefs(context, "SyncProgress", "" + (progress + progressValue));
 
            int getProgress = progressDialog.getProgress();
            progressDialog.setProgress(getProgress + progressValue);
-           if (getProgress >= 100) {
+           if (progress >= 100) {
                progressDialog.dismiss();
 
+               PrefUtils.saveToPrefs(context, "SyncProgress", "0");
                progressDialog.setProgress(0);
 
-             //  PrefUtils.saveToPrefs(context, PrefUtils.PREFS_IS_SYNC_IN_PROGRESS, "false");
+               PrefUtils.saveToPrefs(context, PrefUtils.PREFS_IS_SYNC_IN_PROGRESS, "false");
 
                context.runOnUiThread(new Runnable() {
                    @Override
@@ -432,21 +407,19 @@ public class CommonUtils {
                        new AlertDialog.Builder(context)
                                .setIcon(android.R.drawable.ic_dialog_alert)
                                .setTitle("Syncing")
-                               .setMessage("Pushed data points\n\nProjects updates complete")
+                               .setMessage("Pushed " + " "+totalCachedDataPoints +" data points\n\nProjects updates complete")
                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                    @Override
                                    public void onClick(DialogInterface dialog, int which) {
 
-                                       try {
-                                           MainActivity navigationDrawer = (MainActivity) context;
-                                           FragmentManager fragmentManager = navigationDrawer.getSupportFragmentManager();
+                                       MainActivity navigationDrawer = (MainActivity)context;
+                                       FragmentManager fragmentManager = navigationDrawer.getSupportFragmentManager();
 
-                                           SyncFragment syncFragment = (SyncFragment) fragmentManager.findFragmentByTag(SyncFragment.class.getName());
-                                           if (syncFragment != null) {
+                                       SyncFragment syncFragment = (SyncFragment) fragmentManager.findFragmentByTag(SyncFragment.class.getName());
+                                       if (syncFragment != null) {
 
-                                               syncFragment.refresh();
-                                           }
-                                       }catch (Exception e){}
+                                           syncFragment.refresh();
+                                       }
 
                                    }
 

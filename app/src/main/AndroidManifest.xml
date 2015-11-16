@@ -7,17 +7,22 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true"/>
+    <uses-feature android:name="android.hardware.Sensor.accelerometer" android:required="true"/>
+    <uses-feature android:name="android.hardware.Sensor.gyroscope" android:required="true"/>
+    <uses-feature android:name="android.hardware.Sensor.compass" android:required="true"/>
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher1"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
@@ -73,6 +78,21 @@
                 android:value="com.photosynq.app.MainActivity" />
         </activity>
         <activity
+            android:name=".ProjectMeasurmentActivity"
+            android:parentActivityName=".ProjectDetailsActivity"
+            android:screenOrientation="nosensor"
+            android:windowSoftInputMode="adjustResize" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.photosynq.app.ProjectDetailsActivity" />
+        </activity>
+        <activity
+            android:name=".ProjectDataActivity"
+            android:label="@string/title_activity_project_data"
+            android:screenOrientation="nosensor"
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
+        <activity
             android:name=".DirectionsActivity"
             android:label="@string/title_activity_directions"
             android:screenOrientation="nosensor"
@@ -85,21 +105,17 @@
             android:name=".DisplayCachedDataPoints"
             android:label="@string/title_activity_display_cached_data_points"
             android:screenOrientation="nosensor"
-            android:windowSoftInputMode="adjustResize" >
+            android:windowSoftInputMode="adjustResize">
         </activity>
-
+        <service
+            android:name=".FetchAddressIntentService"
+            android:exported="false"/>
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="d85db13634e01827b24da541f8488afcace1a337" />
-
-
-        <activity
-            android:name=".questions.QuestionsList"
-            android:windowSoftInputMode="adjustPan"
-            android:screenOrientation="portrait"
-            android:keepScreenOn="true"
-            android:label="@string/title_activity_questions_list" >
-        </activity>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDwcvCsx3rBGaAnH0zzD4UVvpdONm8XGiQ" />
     </application>
 
 </manifest>

@@ -143,7 +143,7 @@ public class QuickModeFragment extends Fragment implements PhotosynqResponse , S
                     CommonUtils.writeStringToFile(getActivity(), "macros_variable.js", dataString.toString());
 
                 } catch (JSONException e) {
-
+                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 startActivity(intent);

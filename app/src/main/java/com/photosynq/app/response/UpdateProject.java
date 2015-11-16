@@ -1,7 +1,8 @@
 package com.photosynq.app.response;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.widget.Toast;
@@ -13,6 +14,7 @@ import com.photosynq.app.db.DatabaseHelper;
 import com.photosynq.app.http.HTTPConnection;
 import com.photosynq.app.http.PhotosynqResponse;
 import com.photosynq.app.model.Option;
+import com.photosynq.app.model.ProjectCreator;
 import com.photosynq.app.model.Question;
 import com.photosynq.app.model.ResearchProject;
 import com.photosynq.app.utils.CommonUtils;
@@ -28,11 +30,11 @@ import java.util.Date;
  * Created by shekhar on 9/19/14.
  */
 public class UpdateProject implements PhotosynqResponse {
-    private Activity context;
+    private Context context;
     private MainActivity navigationDrawer;
     private ProgressDialog mProgressDialog;
 
-    public UpdateProject(Activity context, MainActivity navigationDrawer, ProgressDialog progressDialog) {
+    public UpdateProject(Context context, MainActivity navigationDrawer, ProgressDialog progressDialog) {
         this.context = context;
         this.navigationDrawer = navigationDrawer;
         this.mProgressDialog = progressDialog;
@@ -74,6 +76,8 @@ public class UpdateProject implements PhotosynqResponse {
         }else {
             db = DatabaseHelper.getHelper(navigationDrawer);
         }
+//        db.openWriteDatabase();
+//        db.openReadDatabase();
         JSONArray jArray;
 
         if (null != result) {
@@ -87,6 +91,8 @@ public class UpdateProject implements PhotosynqResponse {
 
                     });
                 }
+//                db.closeWriteDatabase();
+//                db.closeReadDatabase();
                 return;
             }
 
@@ -139,6 +145,10 @@ public class UpdateProject implements PhotosynqResponse {
                         JSONObject projectImageUrl = jsonProject.getJSONObject("project_image");//get project image url.
                         JSONObject creatorJsonObj = jsonProject.getJSONObject("creator");//get project creator infos.
                         JSONObject creatorAvatar = creatorJsonObj.getJSONObject("avatar");//
+                        ProjectCreator pCreator = new ProjectCreator();
+                        pCreator.setId(creatorJsonObj.getString("id"));
+                        pCreator.setName(creatorJsonObj.getString("name"));
+                        pCreator.setImageUrl(creatorAvatar.getString("thumb"));
 
                         ResearchProject rp = new ResearchProject(
                                 jsonProject.getString("id"),
@@ -151,20 +161,25 @@ public class UpdateProject implements PhotosynqResponse {
                                 projectImageUrl.getString("small"),
                                 jsonProject.getString("beta"),
                                 jsonProject.getString("is_contributed"),
-                                protocol_ids.substring(1, protocol_ids.length() - 1),
-                                creatorJsonObj.getString("name"),
-                                creatorJsonObj.getString("contributions"),
-                                creatorAvatar.getString("thumb")); // remove first and last square bracket and store as a comma separated string
+                                protocol_ids.substring(1, protocol_ids.length() - 1)); // remove first and last square bracket and store as a comma separated string
 
-                        db.deleteOptions(rp.id);
+                        try {
+                            //get project creator information like id, name, profile_image.
+                            ProjectCreator projectCreator = new ProjectCreator(
+                                    creatorJsonObj.getString("id"),
+                                    creatorJsonObj.getString("name"),
+                                    creatorAvatar.getString("thumb"));
 
-                        db.deleteQuestions(rp.id);
+                            db.updateProjectLead(projectCreator);
 
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         JSONArray customFields = jsonProject.getJSONArray("filters");
                         for (int j = 0; j < customFields.length(); j++) {
                             JSONObject jsonQuestion = customFields.getJSONObject(j);
                             int questionType = Integer.parseInt(jsonQuestion.getString("value_type"));
-                                JSONArray optionValuesJArray = jsonQuestion.getJSONArray("value");
+                            JSONArray optionValuesJArray = jsonQuestion.getJSONArray("value");
                             //Sometime option value is empty i.e we need to set "" parameter.
                             if (optionValuesJArray.length() == 0) {
                                 Option option = new Option(jsonQuestion.getString("id"), "", jsonProject.getString("id"));
@@ -200,6 +215,8 @@ public class UpdateProject implements PhotosynqResponse {
             }
         }
 
+//        db.closeWriteDatabase();
+//        db.closeReadDatabase();
         Date date1 = new Date();
 
         if (null != navigationDrawer) {
@@ -227,6 +244,6 @@ public class UpdateProject implements PhotosynqResponse {
         System.out.println("UpdateProject End onResponseReceived: " + date1.getTime());
         //show progress dialog process on sync screen after sync button click
         int progress = (60 / totalPages) + 1;//60 means 60%, for projects. 60 projects + 20 protocols + 20 macros = 100
-        CommonUtils.setProgress(context, mProgressDialog, progress);
+        CommonUtils.setProgress(navigationDrawer, mProgressDialog, progress);
     }
 }

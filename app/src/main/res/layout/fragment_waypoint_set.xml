@@ -1,0 +1,82 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" tools:context="com.photosynq.app.WaypointSetFragment"
+    android:id="@+id/waypoint"
+    android:label="@string/waypoint_viewer">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_set_wypnt"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_layout_orange"
+            android:layout_margin="10dp"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:text="@string/waypoint_set"
+            android:textAllCaps="false"
+            android:layout_alignParentTop="true">
+        </Button>
+        <Button
+            android:id="@+id/btn_dlt_wypnt"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_layout_orange"
+            android:layout_margin="10dp"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:text="@string/waypoint_delete"
+            android:textAllCaps="false"
+            android:layout_below="@id/btn_set_wypnt">
+        </Button>
+        <Button
+            android:id="@+id/btn_nxt_wypnt"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_layout_orange"
+            android:layout_margin="10dp"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:text="@string/waypoint_next"
+            android:textAllCaps="false"
+            android:visibility="gone"
+            android:layout_below="@id/btn_dlt_wypnt">
+        </Button>
+        <TextView android:id="@+id/distance_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="if you see this shit's going wrong"
+            android:layout_below="@id/btn_dlt_wypnt"/>
+        <ListView android:id="@+id/location_list"
+            android:layout_width="match_parent"
+            android:layout_height="100sp"
+            android:layout_below="@id/distance_text"/>
+        <com.google.android.gms.maps.MapView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/mapView"
+            android:layout_below="@id/location_list"/>
+
+        <Button android:id="@+id/set_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/btn_layout_orange"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:text="@string/waypoint_back"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            />
+
+
+
+
+    </RelativeLayout>
+
+</FrameLayout>
